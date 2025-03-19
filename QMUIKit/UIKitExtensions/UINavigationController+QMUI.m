@@ -200,7 +200,7 @@ QMUISynthesizeIdStrongProperty(qmui_interactiveGestureDelegator, setQmui_interac
                 BOOL willPushActually = viewController && ![selfObject.viewControllers containsObject:viewController];
                 
                 if (!willPushActually) {
-                    QMUIAssert(NO, @"UINavigationController (QMUI)", @"调用了 pushViewController 但实际上没 push 成功，viewController：%@", viewController);
+//                    QMUIAssert(NO, @"UINavigationController (QMUI)", @"调用了 pushViewController 但实际上没 push 成功，viewController：%@", viewController);
                     callSuperBlock();
                     return;
                 }
