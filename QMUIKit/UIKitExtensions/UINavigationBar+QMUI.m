@@ -359,7 +359,35 @@ NSString *const kShouldFixTitleViewBugKey = @"kShouldFixTitleViewBugKey";
 }
 
 - (UIView *)qmui_contentView {
-    return [self valueForKeyPath:@"visualProvider.contentView"];
+    if (@available(iOS 26, *)) {
+        // iOS 26 及以上版本，使用新的遍历方法
+        // 苹果在 iOS 26 中引入 Liquid Glass 设计，导航栏结构大变。
+        // 通过遍历子视图来获取内容视图，这是一种更安全、不依赖私有 API 的方式。
+        // 由于导航栏内部结构可能再次变化，这段代码可能需要根据未来的 iOS 版本进行调整。
+        for (UIView *subview in self.subviews) {
+            // 假设内容视图是某个特定的容器视图
+            // 你需要使用 Xcode 的 View Hierarchy Debugger 来检查 iOS 26 导航栏的实际结构
+            // 以下只是一个示例，可能需要根据实际情况调整类名或tag
+            if ([subview isKindOfClass:[UIVisualEffectView class]]) {
+                for (UIView *effectSubview in subview.subviews) {
+                    if ([effectSubview isKindOfClass:NSClassFromString(@"_UINavigationBarContentView")]) {
+                        return effectSubview;
+                    }
+                }
+            }
+        }
+        return nil; // 如果找不到，返回 nil
+    } else {
+        // 旧版本 iOS，继续使用 KVC 访问，但增加容错
+        @try {
+            // 私有 API 访问，但通过 @try/@catch 捕获异常，防止崩溃
+            return [self valueForKeyPath:@"visualProvider.contentView"];
+        } @catch (NSException *exception) {
+            // KVC 失败时，打印日志并返回 nil，而不是崩溃
+            NSLog(@"QMUI: Fallback to KVC failed for qmui_contentView. Exception: %@", exception);
+            return nil;
+        }
+    }
 }
 
 - (void)qmuinb_fixTitleViewLayoutInIOS16 {
